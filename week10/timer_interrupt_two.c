@@ -46,8 +46,8 @@ void myISR_ledToggle()
 void myISR_ledColor()
 {
     /* [P3] Write your code FROM here */
-
-    g_led_color = true;
+ 
+        g_led_color = true;
 
     /* [P3] Write your code UP TO here */
 }
@@ -72,7 +72,7 @@ int main()
     srand((unsigned int)time(NULL));
 
     // GPIO settings
-    if (gpioInitialise() < 0) {
+    if(gpioInitialise()<0) {
         printf("Cannot initialize GPIOs\r\n");
         return 1;
     }
@@ -99,9 +99,9 @@ int main()
     /* [P3] Write your code UP TO here */
 
     // Infinite loop
-    while (1) {
+    while(1) {
         t_start_ms = millis();
-
+        
         /* [P3] Write your code FROM here */
         if (g_led_on) {
             // While the LED is turned on, switch the LED color if
@@ -111,12 +111,11 @@ int main()
             // `led_color` represents the state of BGR, respectively.
             if (g_led_color) {
                 g_led_color = false;
-                led_color = led_color % 7 + 1;
+                led_color = (led_color %) 7 + 1;
             }
-            gpioWrite(PIN_LEDR, (led_state >> 0) & 1);  // Red LED is controlled by bit 0
-            gpioWrite(PIN_LEDG, (led_state >> 1) & 1);  // Green LED is controlled by bit 1
-            gpioWrite(PIN_LEDB, (led_state >> 2) & 1);  // Blue LED is controlled by bit 2
-        }
+            gpioWrite(PIN_LEDR, (led_color & 0x01) && 1);
+            gpioWrite(PIN_LEDG, (led_color & 0x02) && 1);
+            gpioWrite(PIN_LEDB, (led_color & 0x04) && 1);
 
             gpioServo(PIN_SERVO, servo_positions[g_servo]);
         }

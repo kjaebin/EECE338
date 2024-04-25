@@ -78,7 +78,7 @@ int change_servo_angle(int servo_state){
     }
     servo_angle = 500 * servo_state;
     */
-    servo_angle = SERVO_POS_MIN + servo_state * 180; // Each state changes the angle by 45 degrees
+    servo_angle = SERVO_POS_MIN + servo_state * 500; // Each state changes the angle by 45 degrees
     if (servo_angle > SERVO_POS_MAX){
         servo_angle = SERVO_POS_MIN; 
     } // Reset to minimum if it exceeds max

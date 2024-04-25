@@ -38,7 +38,6 @@ int change_servo_angle(int servo_state) {
 void myISR_ledToggle()
 {
     /* [P3] Write your code FROM here */
-    printf("Timer ISR_ledToggle at %lu ms\r\n", millis());
     g_led_on = !(g_led_on);
     /* [P3] Write your code UP TO here */
 }
@@ -46,7 +45,6 @@ void myISR_ledToggle()
 void myISR_ledColor()
 {
     /* [P3] Write your code FROM here */
-    printf("Timer ISR_ledColor at %lu ms\r\n", millis());
     g_led_color = 1;
     /* [P3] Write your code UP TO here */
 }
@@ -54,7 +52,6 @@ void myISR_ledColor()
 void myISR_servo()
 {
     /* [P3] Write your code FROM here */
-    printf("Timer ISR_servo at %lu ms\r\n", millis());
     g_servo = 1;
     /* [P3] Write your code UP TO here */
 }
@@ -93,7 +90,7 @@ int main()
     //gpioSetTimerFunc(1, *, *);
     //gpioSetTimerFunc(2, *, *);
     gpioSetTimerFunc(0, LOOP_PERIOD_MS, myISR_ledToggle);
-    gpioSetTimerFunc(1, 500, myISR_ledcolor);
+    gpioSetTimerFunc(1, 500, myISR_ledColor);
     gpioSetTimerFunc(2, 600, myISR_servo);
     /* [P3] Write your code UP TO here */
 
@@ -129,7 +126,6 @@ int main()
             gpioWrite(PIN_LEDR, PI_LOW);
             gpioWrite(PIN_LEDG, PI_LOW);
             gpioWrite(PIN_LEDB, PI_LOW);
-            gpioServo(PIN_SERVO, 500);
         }
         /* [P3] Write your code UP TO here */
 

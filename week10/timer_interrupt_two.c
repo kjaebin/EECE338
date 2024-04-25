@@ -14,10 +14,14 @@
 #define SERVO_POS_MIN 1000
 #define SERVO_POS_MAX 2000
 
-#define LOOP_PERIOD_MS 0000  // Set the loop period properly
+#define LOOP_PERIOD_MS 1000  // Set the loop period properly
 
 
 /* [P3] Write your global variables FROM here */
+
+volatile bool led_on = false;
+volatile int led_color_index = 0;
+volatile int servo_angle_index = 0;
 
 /* [P3] Write your global variables UP TO here */
 
@@ -30,6 +34,11 @@ void myISR_ledToggle()
 {
     /* [P3] Write your code FROM here */
     
+    led_on = !led_on;
+    if (!led_on) {
+        servo_angle_index = 0; // Reset servo state when LED is OFF
+    }
+
     /* [P3] Write your code UP TO here */
 }
 
@@ -37,6 +46,10 @@ void myISR_ledColor()
 {
     /* [P3] Write your code FROM here */
     
+    if (led_on) {
+        led_color_index = (led_color_index + 1) % 7; // Cycle through 7 colors
+    }
+
     /* [P3] Write your code UP TO here */
 }
 
@@ -44,6 +57,10 @@ void myISR_servo()
 {
     /* [P3] Write your code FROM here */
     
+    if (led_on) {
+        servo_angle_index = (servo_angle_index + 1) % 5; // Cycle through 5 servo states
+    }
+
     /* [P3] Write your code UP TO here */
 }
 
@@ -52,6 +69,8 @@ int main()
     unsigned long t_start_ms, t_elapsed_ms;
     /* [P3] Write your variables FROM here*/
     
+    int servo_positions[5] = { 1000, 1125, 1250, 1375, 1500 }; // Define servo positions
+
     /* [P3] Write your variables UP TO here*/
 
     srand((unsigned int)time(NULL));
@@ -79,6 +98,10 @@ int main()
     //gpioSetTimerFunc(1, *, *);
     //gpioSetTimerFunc(2, *, *);
 
+    gpioSetTimerFunc(0, 4000, myISR_ledToggle);
+    gpioSetTimerFunc(1, 500, myISR_ledColor);
+    gpioSetTimerFunc(2, 600, myISR_servo);
+
     /* [P3] Write your code UP TO here */
 
     // Infinite loop
@@ -92,7 +115,21 @@ int main()
             
             // Setting LED color using bit-wise operators. Three LSBs of
             // `led_color` represents the state of BGR, respectively.
-            
+        
+        if (led_on) {
+            gpioWrite(PIN_LEDR, led_color_index & 0x01);
+            gpioWrite(PIN_LEDG, led_color_index & 0x02);
+            gpioWrite(PIN_LEDB, led_color_index & 0x04);
+        }
+        else {
+            gpioWrite(PIN_LEDR, PI_LOW);
+            gpioWrite(PIN_LEDG, PI_LOW);
+            gpioWrite(PIN_LEDB, PI_LOW);
+        }
+        // Control Servo based on the current servo_angle_index
+        if (servo_angle_index != 0) {
+            gpioServo(PIN_SERVO, servo_positions[servo_angle_index]);
+        }
 
         /* [P3] Write your code UP TO here */
 

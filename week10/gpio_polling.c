@@ -9,16 +9,15 @@
 #define PIN_LEDB 21
 #define PIN_SERVO 12
 
-// NEVER change SERVO_POS_MIN and SERVO_POS_MAX.
-// Changing the two values may break your servo motor.
-#define SERVO_POS_MIN 1000
-#define SERVO_POS_MAX 2000
+#define SERVO_POS_MIN 500
+#define SERVO_POS_MAX 2500
 
 #define LOOP_PERIOD_MS 1000
 
+int led_state = 1; // Global variable to cycle through LED states
+
 /* [P1] Write your function FROM here, if needed */
-void switch_led_color(int led_state)
-{
+void switch_led_color(int led_state) {
     switch(led_state) {
         case 1:
             gpioWrite(PIN_LEDR, PI_HIGH);
@@ -64,20 +63,21 @@ void switch_led_color(int led_state)
 }
 /* [P1] Write your function UP TO here, if needed */
 
-int main()
-{
-    unsigned long t_start_ms, t_elapsed_ms;
+int change_servo_angle(int servo_state){
+    // Calculate new servo angle based on current state
+    int servo_angle = SERVO_POS_MIN + servo_state * 180; // Each state changes the angle by 45 degrees
+    if (servo_angle > SERVO_POS_MAX) servo_angle = SERVO_POS_MIN; // Reset to minimum if it exceeds max
+    return servo_angle;
+}
 
-    /* [P1] Write your variables FROM here */
-    int servo_angle;
+int main() {
+    unsigned long t_start_ms, t_elapsed_ms;
+    int servo_state = 0;  // To cycle servo from 0-180 degrees in steps
     int btn_state;
-    int led_state = 0;
-    /* [P1] Write your variables UP TO here */
 
     srand((unsigned int)time(NULL));
 
-    // GPIO settings
-    if(gpioInitialise()<0) {
+    if(gpioInitialise() < 0) {
         printf("Cannot initialize GPIOs\r\n");
         return 1;
     }
@@ -92,26 +92,21 @@ int main()
     gpioWrite(PIN_LEDG, PI_LOW);
     gpioWrite(PIN_LEDB, PI_LOW);
 
-    // Infinite loop
     while(1) {
         t_start_ms = millis();
 
         /* [P1] Write your codes FROM here */
-
-        // Set the servo angle to a random position.
-        servo_angle = rand()%(SERVO_POS_MAX-SERVO_POS_MIN) + SERVO_POS_MIN;
+        // Change servo angle based on state
+        int servo_angle = change_servo_angle(servo_state++);
         gpioServo(PIN_SERVO, servo_angle);
-        sleep_ms(1000);
-        
-        // Read the button pin state
-        btn_state = gpioRead(PIN_BTN);
+        servo_state %= 5; // There are 5 states (0-4) corresponding to 0-180 degrees
 
-        // If the button is pushed, change the color of the LED. Be sure the LED color switches between five or more colors.
-         if(btn_state == PI_LOW) {
-            led_state = (led_state + 1) % 7 + 1;
+        // Check button state and change LED color if pressed
+        btn_state = gpioRead(PIN_BTN);
+        if(btn_state == PI_LOW) { // Assuming low means pressed
+            led_state = (led_state % 7) + 1; // Cycle through 7 color states
             switch_led_color(led_state);
         }
-
         /* [P1] Write your codes UP TO here */
 
         t_elapsed_ms = millis() - t_start_ms;

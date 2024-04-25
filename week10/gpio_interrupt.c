@@ -14,29 +14,81 @@
 #define SERVO_POS_MAX 2000
 #define LOOP_PERIOD_MS 1000
 
-#define SERVO_ANGLE_STEP 225  // Define the step size for servo movement
-
-// Global variables
-volatile int btn_state = -1;  // Make sure btn_state is declared globally
-volatile int led_state = 0;   // Global variable to keep track of LED state
+/* [P2] Write your global variables FROM here*/
+volatile int btn_state;
+volatile int led_state;
+/* [P2] Write your global variables UP TO here*/
 
 void myISR()
 {
-    int read_state = gpioRead(PIN_BTN);  // Read the current button state
-    if(read_state != PI_LOW)  // Check if the button is pressed
-        return;  // Return if not pressed to ignore noise
+    btn_state = gpioReadDebounce(PIN_BTN);
+    if(btn_state < 0) // If the input is noise, do nothing
+        return;
 
-    printf("Interrupt! Button state: %d\r\n", read_state);
+    printf("Interrupt! Button state: %d\r\n", btn_state);
 
-    led_state = (led_state + 1) % 7 + 1;  // Change LED state
-    // You can place your LED control logic here or call a function
+    /*** [P2] Write your code FROM here ***/
+    // If the button is pushed, change the color of the LED. Be
+    // sure the LED color switches between five or more colors.
+    
+    if(btn_state == PI_LOW) {
+        led_state = (led_state + 1) % 7 + 1;
+        
+        switch(led_state) {
+        case 1:
+            gpioWrite(PIN_LEDR, PI_HIGH);
+            gpioWrite(PIN_LEDG, PI_LOW);
+            gpioWrite(PIN_LEDB, PI_LOW);
+            break; 
+        case 2:
+            gpioWrite(PIN_LEDR, PI_LOW);
+            gpioWrite(PIN_LEDG, PI_HIGH);
+            gpioWrite(PIN_LEDB, PI_LOW);
+            break;   
+        case 3:
+            gpioWrite(PIN_LEDR, PI_HIGH);
+            gpioWrite(PIN_LEDG, PI_HIGH);
+            gpioWrite(PIN_LEDB, PI_LOW);
+            break;
+        case 4:
+            gpioWrite(PIN_LEDR, PI_LOW);
+            gpioWrite(PIN_LEDG, PI_LOW);
+            gpioWrite(PIN_LEDB, PI_HIGH);
+            break;
+        case 5:
+            gpioWrite(PIN_LEDR, PI_HIGH);
+            gpioWrite(PIN_LEDG, PI_LOW);
+            gpioWrite(PIN_LEDB, PI_HIGH);
+            break;
+        case 6:
+            gpioWrite(PIN_LEDR, PI_LOW);
+            gpioWrite(PIN_LEDG, PI_HIGH);
+            gpioWrite(PIN_LEDB, PI_HIGH);
+            break;
+        case 7:
+            gpioWrite(PIN_LEDR, PI_HIGH);
+            gpioWrite(PIN_LEDG, PI_HIGH);
+            gpioWrite(PIN_LEDB, PI_HIGH);
+            break;
+        default:
+            gpioWrite(PIN_LEDR, PI_LOW);
+            gpioWrite(PIN_LEDG, PI_LOW);
+            gpioWrite(PIN_LEDB, PI_LOW);
+            break;
+        }
+    }
+    /*** [P2] Write your code UP TO here ***/
 }
 
 int main()
 {
     unsigned long t_start_ms, t_elapsed_ms;
-    int servo_angle;
 
+    /* [P2] Write your variables FROM here, if needed */
+    int servo_angle;
+    /* [P2] Write your variables UP TO here, if needed */
+
+    // GPIO settings
     if(gpioInitialise()<0) {
         printf("Cannot initialize GPIOs\r\n");
         return 1;
@@ -52,15 +104,20 @@ int main()
     gpioWrite(PIN_LEDG, PI_LOW);
     gpioWrite(PIN_LEDB, PI_LOW);
 
-    gpioSetISRFunc(PIN_BTN, EITHER_EDGE, 0, myISR);  // Setup ISR for the button
+    // Interrupt settings
+    gpioSetISRFunc(PIN_BTN, EITHER_EDGE, 0, myISR);
 
+    // Infinite loop
     while(1) {
         t_start_ms = millis();
 
-        // Update servo angle based on some logic, if necessary
-        servo_angle = SERVO_POS_MIN + (rand() % 5) * SERVO_ANGLE_STEP;
+        /*** [P2] Delete all codes in between and write your code FROM here ***/
+        
+        servo_angle = rand()%(SERVO_POS_MAX-SERVO_POS_MIN) + SERVO_POS_MIN;
         gpioServo(PIN_SERVO, servo_angle);
-        sleep_ms(1000);  // Delay to simulate time-based changes
+        sleep_ms(1000);
+        
+        /*** [P2] Write your code UP TO here ***/
 
         t_elapsed_ms = millis() - t_start_ms;
         sleep_ms(LOOP_PERIOD_MS - t_elapsed_ms);

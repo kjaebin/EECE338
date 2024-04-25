@@ -237,7 +237,7 @@ int main()
             gpioServo(PIN_SERVO, angle);
             n %= 5;
         }
-        if else(mode == 2) {
+        else if(mode == 2) {
                 gpioRGBColor(rIntensity, gIntensity, bIntensity);
                 gpioServo(PIN_SERVO, servo_angle);
         }

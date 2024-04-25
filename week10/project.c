@@ -236,7 +236,7 @@ int main()
             switch_led_color(led_state);
             gpioServo(PIN_SERVO, angle);
         }
-        else if (g_serve) {
+        else if (g_servo) {
             g_servo = false;
             switch_led_color(0);
             angle = change_servo_angle(n++);

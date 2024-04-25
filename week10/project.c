@@ -36,7 +36,9 @@ volatile bool g_led_fade = false;
 volatile bool g_led_on = false;
 volatile bool g_led_color = false;
 volatile bool g_led_blink = false;
-volatile bool g_servo = true;
+volatile bool g_servo = true; 
+volatile int servo_state = 0;
+
 /* [P4] Write your global variables UP TO here */
 
 
@@ -141,12 +143,9 @@ void myISR_setMode()
 void myISR_servo()
 {
     /* [P4] Write your code FROM here */
-    if (mode == 1) {
         g_servo = true;
-    }
-    else {
-        g_servo = false;
-    }
+    
+
     /* [P4] Write your code UP TO here */
 }
 
@@ -154,25 +153,16 @@ void myISR_servo()
 void myISR_led()
 {
     /*** [P4] Write your code FROM here ***/
-    if (mode == 0) {
-        g_led_on = true;
+        g_led_on = !g_led_on;
 
-    }
-    else {
-        g_led_on = false;
-    }
     /*** [P4] Write your code UP TO here ***/
 }
 
 void myISR_color()
 {
     /*** [P4] Write your code FROM here ***/
-    if (mode == 0) {
         g_led_color = true;
-    }
-    else {
-        g_led_color = false;
-    }
+  
     /*** [P4] Write your code UP TO here ***/
 }
 
@@ -217,9 +207,11 @@ int main()
     /* [P4] Write your code FROM here */
     gpioSetISRFunc(PIN_BTN, EITHER_EDGE, 0, myISR_setMode);
     // Set the period properly
-    gpioSetTimerFunc(0, 800, myISR_servo);
-    gpioSetTimerFunc(1, 500, myISR_color);    
-    gpioSetTimerFunc(1, 10, myISR_fade);
+    gpioSetTimerFunc(1, 500, myISR_color);
+    gpioSetTimerFunc(2, 800, myISR_servo);
+    gpioSetTimerFunc(3, LOOP_PERIOD_MS, myISR_fade);
+
+
 
     //gpioSetTimerFunc(2, 600, myISR_color);
     /* [P4] Write your code UP TO here */
@@ -229,7 +221,7 @@ int main()
         t_start_ms = millis();
         
         /* [P4] Write your code FROM here */
-        if (g_led_color) {
+        if (mode == 0) {
             g_led_on = false;
             if (g_led_color) {
                 g_led_color = false;
@@ -238,7 +230,7 @@ int main()
             switch_led_color(led_state);
             gpioServo(PIN_SERVO, angle);
         }
-        else if (g_servo) {
+        else if (mode == 1) {
             g_servo = false;
             switch_led_color(0);
             angle = change_servo_angle(n++);
@@ -246,11 +238,8 @@ int main()
             n %= 5;
         }
         else {
-            if (g_led_fade) {
-                g_led_fade = false;
                 gpioRGBColor(rIntensity, gIntensity, bIntensity);
                 gpioServo(PIN_SERVO, servo_angle);
-            }
         }
         
         /* [P4] Write your code UP TO here */

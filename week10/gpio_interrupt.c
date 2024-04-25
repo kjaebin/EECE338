@@ -10,8 +10,8 @@
 #define PIN_LEDB 21
 #define PIN_SERVO 12
 
-#define SERVO_POS_MIN 1000
-#define SERVO_POS_MAX 2000
+#define SERVO_POS_MIN 500
+#define SERVO_POS_MAX 2500
 #define LOOP_PERIOD_MS 1000
 
 /* [P2] Write your global variables FROM here*/

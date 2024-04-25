@@ -228,7 +228,7 @@ int main()
         
         /* [P4] Write your code FROM here */
         if (g_led_color) {
-            g_led_on = true;
+            g_led_on = false;
             if (g_led_color) {
                 g_led_color = false;
                 led_state = led_state % 7 + 1;
@@ -237,6 +237,7 @@ int main()
             gpioServo(PIN_SERVO, angle);
         }
         else if (g_serve) {
+            g_servo = false;
             switch_led_color(0);
             angle = change_servo_angle(n++);
             gpioServo(PIN_SERVO, angle);

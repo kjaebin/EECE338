@@ -19,6 +19,64 @@ volatile int btn_state;
 volatile int led_state;
 /* [P2] Write your global variables UP TO here*/
 
+
+
+/* [P2] Write your function FROM here, if needed */
+void switch_led_color(int led_state)
+{
+    switch (led_state) {
+    case 1:
+        gpioWrite(PIN_LEDR, PI_HIGH);
+        gpioWrite(PIN_LEDG, PI_LOW);
+        gpioWrite(PIN_LEDB, PI_LOW);
+        break;
+    case 2:
+        gpioWrite(PIN_LEDR, PI_LOW);
+        gpioWrite(PIN_LEDG, PI_HIGH);
+        gpioWrite(PIN_LEDB, PI_LOW);
+        break;
+    case 3:
+        gpioWrite(PIN_LEDR, PI_HIGH);
+        gpioWrite(PIN_LEDG, PI_HIGH);
+        gpioWrite(PIN_LEDB, PI_LOW);
+        break;
+    case 4:
+        gpioWrite(PIN_LEDR, PI_LOW);
+        gpioWrite(PIN_LEDG, PI_LOW);
+        gpioWrite(PIN_LEDB, PI_HIGH);
+        break;
+    case 5:
+        gpioWrite(PIN_LEDR, PI_HIGH);
+        gpioWrite(PIN_LEDG, PI_LOW);
+        gpioWrite(PIN_LEDB, PI_HIGH);
+        break;
+    case 6:
+        gpioWrite(PIN_LEDR, PI_LOW);
+        gpioWrite(PIN_LEDG, PI_HIGH);
+        gpioWrite(PIN_LEDB, PI_HIGH);
+        break;
+    case 7:
+        gpioWrite(PIN_LEDR, PI_HIGH);
+        gpioWrite(PIN_LEDG, PI_HIGH);
+        gpioWrite(PIN_LEDB, PI_HIGH);
+        break;
+    case 0:
+        gpioWrite(PIN_LEDR, PI_LOW);
+        gpioWrite(PIN_LEDG, PI_LOW);
+        gpioWrite(PIN_LEDB, PI_LOW);
+        break;
+    }
+}
+int change_servo_angle(int servo_state) {
+    int servo_angle;
+    servo_angle = SERVO_POS_MIN + servo_state * 500; // Each state changes the angle by 45 degrees
+    if (servo_angle > SERVO_POS_MAX) {
+        servo_angle = SERVO_POS_MIN;
+    }
+    return servo_angle;
+}
+/* [P2] Write your function UP TO here, if needed */
+
 void myISR()
 {
     btn_state = gpioReadDebounce(PIN_BTN);
@@ -30,52 +88,12 @@ void myISR()
     /*** [P2] Write your code FROM here ***/
     // If the button is pushed, change the color of the LED. Be
     // sure the LED color switches between five or more colors.
-    
-    if(btn_state == PI_LOW) {
+    if (btn_state == PI_LOW) {
         led_state = (led_state + 1) % 7 + 1;
-        
-        switch(led_state) {
-        case 1:
-            gpioWrite(PIN_LEDR, PI_HIGH);
-            gpioWrite(PIN_LEDG, PI_LOW);
-            gpioWrite(PIN_LEDB, PI_LOW);
-            break; 
-        case 2:
-            gpioWrite(PIN_LEDR, PI_LOW);
-            gpioWrite(PIN_LEDG, PI_HIGH);
-            gpioWrite(PIN_LEDB, PI_LOW);
-            break;   
-        case 3:
-            gpioWrite(PIN_LEDR, PI_HIGH);
-            gpioWrite(PIN_LEDG, PI_HIGH);
-            gpioWrite(PIN_LEDB, PI_LOW);
-            break;
-        case 4:
-            gpioWrite(PIN_LEDR, PI_LOW);
-            gpioWrite(PIN_LEDG, PI_LOW);
-            gpioWrite(PIN_LEDB, PI_HIGH);
-            break;
-        case 5:
-            gpioWrite(PIN_LEDR, PI_HIGH);
-            gpioWrite(PIN_LEDG, PI_LOW);
-            gpioWrite(PIN_LEDB, PI_HIGH);
-            break;
-        case 6:
-            gpioWrite(PIN_LEDR, PI_LOW);
-            gpioWrite(PIN_LEDG, PI_HIGH);
-            gpioWrite(PIN_LEDB, PI_HIGH);
-            break;
-        case 7:
-            gpioWrite(PIN_LEDR, PI_HIGH);
-            gpioWrite(PIN_LEDG, PI_HIGH);
-            gpioWrite(PIN_LEDB, PI_HIGH);
-            break;
-        default:
-            gpioWrite(PIN_LEDR, PI_LOW);
-            gpioWrite(PIN_LEDG, PI_LOW);
-            gpioWrite(PIN_LEDB, PI_LOW);
-            break;
-        }
+        switch_led_color(led_state);
+    }
+    else {
+        switch_led_color(0);
     }
     /*** [P2] Write your code UP TO here ***/
 }
@@ -85,7 +103,8 @@ int main()
     unsigned long t_start_ms, t_elapsed_ms;
 
     /* [P2] Write your variables FROM here, if needed */
-    int servo_angle;
+    int angle;
+    int n = 0;
     /* [P2] Write your variables UP TO here, if needed */
 
     // GPIO settings
@@ -112,11 +131,10 @@ int main()
         t_start_ms = millis();
 
         /*** [P2] Delete all codes in between and write your code FROM here ***/
-        
-        servo_angle = rand()%(SERVO_POS_MAX-SERVO_POS_MIN) + SERVO_POS_MIN;
-        gpioServo(PIN_SERVO, servo_angle);
-        sleep_ms(1000);
-        
+        angle = change_servo_angle(n++);
+        gpioServo(PIN_SERVO, angle);
+        n %= 5;
+        sleep_ms(LOOP_PERIOD_MS);
         /*** [P2] Write your code UP TO here ***/
 
         t_elapsed_ms = millis() - t_start_ms;

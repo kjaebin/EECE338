@@ -55,7 +55,7 @@ void switch_led_color(int led_state)
         gpioWrite(PIN_LEDG, PI_HIGH);
         gpioWrite(PIN_LEDB, PI_HIGH);
         break;
-    case 0:
+    default:
         gpioWrite(PIN_LEDR, PI_LOW);
         gpioWrite(PIN_LEDG, PI_LOW);
         gpioWrite(PIN_LEDB, PI_LOW);
@@ -66,21 +66,12 @@ void switch_led_color(int led_state)
 /* [P1] Write your function UP TO here, if needed */
 
 
-int change_servo_angle(int servo_state){
+int change_servo_angle(int servo_state) {
     int servo_angle;
-   /* [P1] Write your function for servo*/
-    /*
-    if (servo_state == 5) {
-        servo_state = 1;
-    }
-    else {
-        servo_state++;
-    }
-    servo_angle = 500 * servo_state;
-    */
+    /* [P1] Write your function for servo*/
     servo_angle = SERVO_POS_MIN + servo_state * 500; // Each state changes the angle by 45 degrees
-    if (servo_angle > SERVO_POS_MAX){
-        servo_angle = SERVO_POS_MIN; 
+    if (servo_angle > SERVO_POS_MAX) {
+        servo_angle = SERVO_POS_MIN;
     } // Reset to minimum if it exceeds max
 
    /* [P1] Write your function FROM here*/
@@ -101,7 +92,7 @@ int main()
     srand((unsigned int)time(NULL));
 
     // GPIO settings
-    if(gpioInitialise()<0) {
+    if (gpioInitialise() < 0) {
         printf("Cannot initialize GPIOs\r\n");
         return 1;
     }
@@ -117,7 +108,7 @@ int main()
     gpioWrite(PIN_LEDB, PI_LOW);
 
     // Infinite loop
-    while(1) {
+    while (1) {
         t_start_ms = millis();
 
         /* [P1] Write your codes FROM here */
@@ -136,9 +127,7 @@ int main()
             led_state = (led_state + 1) % 7 + 1;
             switch_led_color(led_state);
         }
-        else {
-            switch_led_color(0);
-        }
+
         /* [P1] Write your codes UP TO here */
 
         t_elapsed_ms = millis() - t_start_ms;

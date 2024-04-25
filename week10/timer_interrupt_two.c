@@ -66,7 +66,7 @@ int main()
 {
     unsigned long t_start_ms, t_elapsed_ms;
     /* [P3] Write your variables FROM here*/
-
+    int led_color = 0;
     /* [P3] Write your variables UP TO here*/
 
     srand((unsigned int)time(NULL));

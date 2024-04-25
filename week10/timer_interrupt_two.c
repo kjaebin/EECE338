@@ -111,7 +111,7 @@ int main()
             // `led_color` represents the state of BGR, respectively.
             if (g_led_color) {
                 g_led_color = false;
-                led_color = led_color % 7 + 1'
+                led_color = led_color % 7 + 1;
             }
             gpioWrite(PIN_LEDR, (led_color & 0x01));
             gpioWrite(PIN_LEDG, (led_color & 0x02));

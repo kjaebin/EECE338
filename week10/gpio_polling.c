@@ -16,51 +16,24 @@
 
 #define LOOP_PERIOD_MS 1000
 
+
 /* [P1] Write your function FROM here, if needed */
-void switch_led_color(int led_state)
-{
-    switch (led_state) {
-    case 1:
-        gpioWrite(PIN_LEDR, PI_HIGH);
-        gpioWrite(PIN_LEDG, PI_LOW);
-        gpioWrite(PIN_LEDB, PI_LOW);
-        break;
-    case 2:
-        gpioWrite(PIN_LEDR, PI_LOW);
-        gpioWrite(PIN_LEDG, PI_HIGH);
-        gpioWrite(PIN_LEDB, PI_LOW);
-        break;
-    case 3:
-        gpioWrite(PIN_LEDR, PI_HIGH);
-        gpioWrite(PIN_LEDG, PI_HIGH);
-        gpioWrite(PIN_LEDB, PI_LOW);
-        break;
-    case 4:
-        gpioWrite(PIN_LEDR, PI_LOW);
-        gpioWrite(PIN_LEDG, PI_LOW);
-        gpioWrite(PIN_LEDB, PI_HIGH);
-        break;
-    case 5:
-        gpioWrite(PIN_LEDR, PI_HIGH);
-        gpioWrite(PIN_LEDG, PI_LOW);
-        gpioWrite(PIN_LEDB, PI_HIGH);
-        break;
-    case 6:
-        gpioWrite(PIN_LEDR, PI_LOW);
-        gpioWrite(PIN_LEDG, PI_HIGH);
-        gpioWrite(PIN_LEDB, PI_HIGH);
-        break;
-    case 7:
-        gpioWrite(PIN_LEDR, PI_HIGH);
-        gpioWrite(PIN_LEDG, PI_HIGH);
-        gpioWrite(PIN_LEDB, PI_HIGH);
-        break;
-    case 0:
-        gpioWrite(PIN_LEDR, PI_LOW);
-        gpioWrite(PIN_LEDG, PI_LOW);
-        gpioWrite(PIN_LEDB, PI_LOW);
-        break;
-    }
+
+#define SERVO_ANGLE_STEP 450
+
+int ledStates[5][3] = {
+    {1, 0, 0},  // Red
+    {0, 1, 0},  // Green
+    {0, 0, 1},  // Blue
+    {1, 1, 0},  // Yellow
+    {1, 0, 1}   // Magenta
+};
+
+void updateLEDColor() {
+    gpioWrite(PIN_LEDR, ledStates[currentColorIndex][0]);
+    gpioWrite(PIN_LEDG, ledStates[currentColorIndex][1]);
+    gpioWrite(PIN_LEDB, ledStates[currentColorIndex][2]);
+    currentColorIndex = (currentColorIndex + 1) % 5;
 }
 
 /* [P1] Write your function UP TO here, if needed */
@@ -68,15 +41,15 @@ void switch_led_color(int led_state)
 
 int change_servo_angle(int servo_state){
     int servo_angle;
-   /* [P1] Write your function for servo*/
-    if (servo_state == 5) {
-        servo_state = 1;
+	/* [P1] Write your function for servo*/
+
+    int servo_angle = SERVO_POS_MIN + *servoState * SERVO_ANGLE_STEP;
+    if (servo_angle > SERVO_POS_MAX || servo_angle < SERVO_POS_MIN) {
+        *servoState = 0;  // Reset state if out of bounds
+        servo_angle = SERVO_POS_MIN;
     }
-    else {
-        servo_state++;
-    }
-    servo_angle = 500 * servo_state;
-   /* [P1] Write your function FROM here*/
+
+	/* [P1] Write your function FROM here*/
     return servo_angle;
 }
 
@@ -87,10 +60,10 @@ int main()
     unsigned long t_start_ms, t_elapsed_ms;
 
     /* [P1] Write your variables FROM here */
-    int angle;
-    int n = 1;
-    int btn_state;
-    int led_state = 0;
+
+    int currentColorIndex = 0;
+    int servoState = 0;
+
     /* [P1] Write your variables UP TO here */
 
     srand((unsigned int)time(NULL));
@@ -117,22 +90,24 @@ int main()
 
         /* [P1] Write your codes FROM here */
         // Set the servo angle to 0->45->90->145->180...
-        angle = change_servo_angle(n);
-        gpioServo(PIN_SERVO, angle);
-        sleep_ms(LOOP_PERIOD_MS);
 
         // Read the button pin state
-        btn_state = gpioRead(PIN_BTN);
 
         // If the button is pushed, change the color of the LED. Be
         // sure the LED color switches between five or more colors.
-        if (btn_state == PI_LOW) {
-            led_state = (led_state + 1) % 7 + 1;
-            switch_led_color(led_state);
+
+        // Update servo angle
+        int servo_angle = change_servo_angle(servoState);
+        gpioServo(PIN_SERVO, servo_angle);
+        servoState = (servoState + 1) % 5;  // Update state for next iteration
+
+        // Read the button pin state
+        int buttonState = gpioRead(PIN_BTN);
+        printf("Button state: %d\n", buttonState);
+        if (buttonState == PI_LOW) {  // If the button is pushed
+            updateLEDColor();
         }
-        else {
-            switch_led_color(0);
-        }
+
         /* [P1] Write your codes UP TO here */
 
         t_elapsed_ms = millis() - t_start_ms;

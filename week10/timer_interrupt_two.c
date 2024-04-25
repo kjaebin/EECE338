@@ -112,7 +112,7 @@ int main()
 
             gpioWrite(PIN_LEDR, (g_led_color & 0x01));
             gpioWrite(PIN_LEDG, (g_led_color & 0x02));
-            gpioWrite(PIN_LEDB, (g_eld_color & 0x04));
+            gpioWrite(PIN_LEDB, (g_led_color & 0x04));
             gpioServo(PIN_SERVO, servo_positions[g_servo]);
         }
         else {

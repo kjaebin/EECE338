@@ -9,9 +9,9 @@
 void switch_led_color(int led_state)
 {
             
-            gpioWrite(PIN_LEDR, led_color_index & 0x01);
-            gpioWrite(PIN_LEDG, led_color_index & 0x02);
-            gpioWrite(PIN_LEDB, led_color_index & 0x04);
+            gpioWrite(PIN_LEDR, led_state & 0x01);
+            gpioWrite(PIN_LEDG, led_state & 0x02);
+            gpioWrite(PIN_LEDB, led_state & 0x04);
     
 
 

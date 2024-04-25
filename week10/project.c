@@ -230,14 +230,14 @@ int main()
             switch_led_color(led_state);
             gpioServo(PIN_SERVO, angle);
         }
-        else if (mode == 1) {
+        else if (g_servo) {
             g_servo = false;
             switch_led_color(0);
             angle = change_servo_angle(n++);
             gpioServo(PIN_SERVO, angle);
             n %= 5;
         }
-        else {
+        if else(mode == 2) {
                 gpioRGBColor(rIntensity, gIntensity, bIntensity);
                 gpioServo(PIN_SERVO, servo_angle);
         }

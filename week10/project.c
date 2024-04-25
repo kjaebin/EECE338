@@ -243,11 +243,11 @@ int main()
             gpioServo(PIN_SERVO, angle);
             n %= 5;
         }
-        else {
-            if (g_led_fade) {
+        else if (g_led_fade) {
+            g_led_fade = false;
                 gpioRGBColor(rIntensity, gIntensity, bIntensity);
-                gpioServo(PIN_SERVO, servo_angle);
-            }
+                gpioServo(PIN_SERVO, angle);
+     
         
         }
         

@@ -36,7 +36,7 @@ volatile bool g_led_fade = false;
 volatile bool g_led_on = false;
 volatile bool g_led_color = false;
 volatile bool g_led_blink = false;
-volatile bool g_servo = true; 
+volatile bool g_servo = true;
 volatile int servo_state = 0;
 
 /* [P4] Write your global variables UP TO here */
@@ -93,14 +93,14 @@ int change_servo_angle(int servo_state) {
     servo_angle = SERVO_POS_MIN + servo_state * 500; // Each state changes the angle by 45 degrees
     if (servo_angle > SERVO_POS_MAX) {
         servo_angle = SERVO_POS_MIN;
-    } 
+    }
     return servo_angle;
 }
 /* [P4] Write your function UP TO here, if needed */
 
 void myISR_fade()
-{   
-    if(mode == MODE_MOOD)
+{
+    if (mode == MODE_MOOD)
     {
         g_led_fade = true;
 
@@ -115,14 +115,14 @@ void myISR_fade()
             gDelta *= -1;
         if (bIntensity >= 255 || bIntensity <= 0)
             bDelta *= -1;
-        
-        
+
+
         servo_angle = servo_angle + sDelta;
-        if (servo_angle >= SERVO_POS_MAX || servo_angle <= SERVO_POS_MIN){
+        if (servo_angle >= SERVO_POS_MAX || servo_angle <= SERVO_POS_MIN) {
             sDelta *= -1;
             servo_angle = servo_angle + sDelta;
-      }
-        
+        }
+
     }
     else
         g_led_fade = false;
@@ -132,7 +132,7 @@ void myISR_fade()
 void myISR_setMode()
 {
     btn_state = gpioReadDebounce(PIN_BTN);
-    if(btn_state < 0) // If the input is noise, do nothing
+    if (btn_state < 0) // If the input is noise, do nothing
         return;
 
     /*** [P4] Write your code FROM here ***/
@@ -143,8 +143,8 @@ void myISR_setMode()
 void myISR_servo()
 {
     /* [P4] Write your code FROM here */
-        g_servo = true;
-    
+    g_servo = true;
+
 
     /* [P4] Write your code UP TO here */
 }
@@ -153,7 +153,7 @@ void myISR_servo()
 void myISR_led()
 {
     /*** [P4] Write your code FROM here ***/
-        g_led_on = !g_led_on;
+    g_led_on = !g_led_on;
 
     /*** [P4] Write your code UP TO here ***/
 }
@@ -161,8 +161,8 @@ void myISR_led()
 void myISR_color()
 {
     /*** [P4] Write your code FROM here ***/
-        g_led_color = true;
-  
+    g_led_color = true;
+
     /*** [P4] Write your code UP TO here ***/
 }
 
@@ -187,7 +187,7 @@ int main()
     srand((unsigned int)time(NULL));
 
     // GPIO settings
-    if(gpioInitialise()<0) {
+    if (gpioInitialise() < 0) {
         printf("Cannot initialize GPIOs\r\n");
         return 1;
     }
@@ -217,9 +217,9 @@ int main()
     /* [P4] Write your code UP TO here */
 
     // Infinite loop
-    while(1) {
+    while (1) {
         t_start_ms = millis();
-        
+
         /* [P4] Write your code FROM here */
         if (mode == 0) {
             g_led_on = false;
@@ -237,11 +237,11 @@ int main()
             gpioServo(PIN_SERVO, angle);
             n %= 5;
         }
-        else if(mode == 2) {
-                gpioRGBColor(rIntensity, gIntensity, bIntensity);
-                gpioServo(PIN_SERVO, servo_angle);
+        else if (mode == 2) {
+            gpioRGBColor(rIntensity, gIntensity, bIntensity);
+            gpioServo(PIN_SERVO, servo_angle);
         }
-        
+
         /* [P4] Write your code UP TO here */
 
         t_elapsed_ms = millis() - t_start_ms;

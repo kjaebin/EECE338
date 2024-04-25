@@ -109,11 +109,21 @@ int main()
 
             // Setting LED color using bit-wise operators. Three LSBs of
             // `led_color` represents the state of BGR, respectively.
+            if (g_led_color) {
+                g_led_color = false;
+                led_state = (led_state + 1) % 7 + 1;
+            }
+            gpioWrite(PIN_LEDR, (led_state & 0x01) && 1);
+            gpioWrite(PIN_LEDG, (led_state & 0x02) && 1);
+            gpioWrite(PIN_LEDB, (led_state & 0x04) && 1);
 
-            gpioWrite(PIN_LEDR, (g_led_color & 0x01));
-            gpioWrite(PIN_LEDG, (g_led_color & 0x02));
-            gpioWrite(PIN_LEDB, (g_led_color & 0x04));
-            gpioServo(PIN_SERVO, servo_positions[g_servo]);
+            if (g_servo) {
+                g_servo = false;
+                angle = change_servo_angle(n++);
+                gpioServo(PIN_SERVO, angle);
+                n %= 5;
+            }
+            gpioServo(PIN_SERVO, angle);
         }
         else {
             gpioWrite(PIN_LEDR, PI_LOW);

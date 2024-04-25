@@ -138,31 +138,43 @@ void myISR_setMode()
     /*** [P4] Write your code UP TO here ***/
 }
 
-void myISR_led() {
-    // Only affect LED on/off status in LED mode
-    if (mode == MODE_LED) {
-        g_led_on = true;
-    } else {
-        g_led_on = false;
+void myISR_servo()
+{
+    /* [P4] Write your code FROM here */
+    if (mode == 1) {
+        g_servo = true;
     }
-}
-
-void myISR_color() {
-    // Trigger color change only in LED mode
-    if (mode == MODE_LED) {
-        g_led_color = true;
-    } else {
-        g_led_color = false;
-    }
-}
-
-void myISR_servo() {
-    // Ensure servo is stopped in LED mode
-    if (mode == MODE_LED) {
+    else {
         g_servo = false;
     }
+    /* [P4] Write your code UP TO here */
 }
 
+
+void myISR_led()
+{
+    /*** [P4] Write your code FROM here ***/
+    if (mode == 0) {
+        g_led_on = true;
+
+    }
+    else {
+        g_led_on = false;
+    }
+    /*** [P4] Write your code UP TO here ***/
+}
+
+void myISR_color()
+{
+    /*** [P4] Write your code FROM here ***/
+    if (mode == 0) {
+        g_led_color = true;
+    }
+    else {
+        g_led_color = false;
+    }
+    /*** [P4] Write your code UP TO here ***/
+}
 
 
 
@@ -213,39 +225,39 @@ int main()
     /* [P4] Write your code UP TO here */
 
     // Infinite loop
-while(1) {
-    t_start_ms = millis();
-
-    // Handle LED color cycling in LED mode
-    if (g_led_on) {
+    while(1) {
+        t_start_ms = millis();
+        
+        /* [P4] Write your code FROM here */
         if (g_led_color) {
-            g_led_color = false;
-            led_state = (led_state + 1) % 7 + 1; // Cycle through LED colors
+            g_led_on = false;
+            if (g_led_color) {
+                g_led_color = false;
+                led_state = led_state % 7 + 1;
+            }
             switch_led_color(led_state);
+            gpioServo(PIN_SERVO, angle);
         }
-        gpioServo(PIN_SERVO, SERVO_POS_MIN); // Ensure servo is stopped in LED mode
-    } else {
-        switch_led_color(0); // Ensure all LEDs are off when not in LED mode
-    }
-
-    // Handle Motor and Mood mode operations
-    if (g_servo) {
-        g_servo = false;
-        if (mode == MODE_MOTOR) {
+        else if (g_servo) {
+            g_servo = false;
+            switch_led_color(0);
             angle = change_servo_angle(n++);
             gpioServo(PIN_SERVO, angle);
-            n %= 5; // Ensure we cycle through predefined servo positions
+            n %= 5;
         }
-    } else if (g_led_fade) {
-        g_led_fade = false;
-        gpioRGBColor(rIntensity, gIntensity, bIntensity); // Mood mode color change
-        gpioServo(PIN_SERVO, servo_angle); // Mood mode servo motion
+        else {
+            if (g_led_fade) {
+                g_led_fade = false;
+                gpioRGBColor(rIntensity, gIntensity, bIntensity);
+                gpioServo(PIN_SERVO, servo_angle);
+            }
+        }
+        
+        /* [P4] Write your code UP TO here */
+
+        t_elapsed_ms = millis() - t_start_ms;
+        sleep_ms(LOOP_PERIOD_MS - t_elapsed_ms);
     }
-
-    t_elapsed_ms = millis() - t_start_ms;
-    sleep_ms(LOOP_PERIOD_MS - t_elapsed_ms);
-}
-
 
     return 1;
 }

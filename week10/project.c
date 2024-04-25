@@ -181,6 +181,7 @@ int main()
     /* [P4] Write your variables FROM here*/
     int angle;
     int n = 0;
+    int led_state = 0;
     /* [P4] Write your variables UP TO here*/
 
     srand((unsigned int)time(NULL));
@@ -221,7 +222,7 @@ int main()
                 led_state = led_state % 7 + 1;
             }
             switch_led_color(led_state);
-            gpioServo(PIN_SERVO, angle]);
+            gpioServo(PIN_SERVO, angle);
             sleeps_ms(500);
         }
         else if (mode == 1) {

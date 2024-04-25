@@ -19,7 +19,7 @@
 
 /* [P3] Write your global variables FROM here */
 volatile bool g_led_on = false;
-volatile int g_led_color = 0;
+volatile bool g_led_color = false;
 volatile int g_servo = 0;
 int servo_positions[] = { 500, 1000, 1500, 2000, 2500 };
 /* [P3] Write your global variables UP TO here */
@@ -46,9 +46,9 @@ void myISR_ledToggle()
 void myISR_ledColor()
 {
     /* [P3] Write your code FROM here */
-    if (g_led_on) {
-        g_led_color = (g_led_color + 1) % 7;
-    }
+ 
+        g_led_color = true;
+
     /* [P3] Write your code UP TO here */
 }
 
@@ -111,19 +111,13 @@ int main()
             // `led_color` represents the state of BGR, respectively.
             if (g_led_color) {
                 g_led_color = false;
-                led_state = (led_state + 1) % 7 + 1;
+                led_color = led_color % 7 + 1'
             }
-            gpioWrite(PIN_LEDR, (led_state & 0x01) && 1);
-            gpioWrite(PIN_LEDG, (led_state & 0x02) && 1);
-            gpioWrite(PIN_LEDB, (led_state & 0x04) && 1);
+            gpioWrite(PIN_LEDR, (led_color & 0x01));
+            gpioWrite(PIN_LEDG, (led_color & 0x02));
+            gpioWrite(PIN_LEDB, (led_color & 0x04));
 
-            if (g_servo) {
-                g_servo = false;
-                angle = change_servo_angle(n++);
-                gpioServo(PIN_SERVO, angle);
-                n %= 5;
-            }
-            gpioServo(PIN_SERVO, angle);
+            gpioServo(PIN_SERVO, servo_positions[g_servo]);
         }
         else {
             gpioWrite(PIN_LEDR, PI_LOW);

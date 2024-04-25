@@ -97,33 +97,32 @@ int change_servo_angle(int servo_state) {
 /* [P4] Write your function UP TO here, if needed */
 
 void myISR_fade()
-{   
+{
     if(mode == MODE_MOOD)
     {
-        g_led_fade = true;
+        g_led_fade = true;  // Set flag to update RGB color in the main loop
 
-        // Slowly increase or derease the intensity of each color
-        rIntensity = rIntensity + rDelta;
-        gIntensity = gIntensity + gDelta;
-        bIntensity = bIntensity + bDelta;
+        // Update RGB intensity values
+        rIntensity += rDelta;
+        gIntensity += gDelta;
+        bIntensity += bDelta;
 
-        if (rIntensity >= 255 || rIntensity <= 0)
-            rDelta *= -1;
-        if (gIntensity >= 255 || gIntensity <= 0)
-            gDelta *= -1;
-        if (bIntensity >= 255 || bIntensity <= 0)
-            bDelta *= -1;
-        
-        
-        servo_angle = servo_angle + sDelta;
-        if (servo_angle >= SERVO_POS_MAX || servo_angle <= SERVO_POS_MIN){
-            sDelta *= -1;
-            servo_angle = servo_angle + sDelta;
-      }
-        
+        // Reverse direction if reaching the limits for any color
+        if (rIntensity >= 255 || rIntensity <= 0) rDelta = -rDelta;
+        if (gIntensity >= 255 || gIntensity <= 0) gDelta = -gDelta;
+        if (bIntensity >= 255 || bIntensity <= 0) bDelta = -bDelta;
+
+        // Adjust the servo angle gradually
+        servo_angle += sDelta;
+        if (servo_angle >= SERVO_POS_MAX || servo_angle <= SERVO_POS_MIN) {
+            sDelta = -sDelta;  // Change direction at bounds
+            servo_angle += sDelta;  // Apply the new direction immediately
+        }
     }
     else
-        g_led_fade = false;
+    {
+        g_led_fade = false;  // Disable updates when not in mood mode
+    }
 }
 
 
@@ -243,12 +242,18 @@ int main()
             gpioServo(PIN_SERVO, angle);
             n %= 5;
         }
-        else if (g_led_fade) {
-            g_led_fade = false;
-                gpioRGBColor(rIntensity, gIntensity, bIntensity);
-                gpioServo(PIN_SERVO, angle);
-     
-        
+/* [P4] Write your code FROM here */
+if (g_led_fade) {
+    // Apply the RGB color changes when the fade flag is set
+    gpioRGBColor(rIntensity, gIntensity, bIntensity);
+
+    // Move the servo according to the current angle set in ISR
+    gpioServo(PIN_SERVO, servo_angle);
+
+    g_led_fade = false;  // Reset the flag after updating
+}
+/* [P4] Write your code UP TO here */
+
         }
         
         /* [P4] Write your code UP TO here */

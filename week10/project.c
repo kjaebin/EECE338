@@ -97,7 +97,7 @@ int change_servo_angle(int servo_state) {
 /* [P4] Write your function UP TO here, if needed */
 
 void myISR_fade()
-{   
+{
     if(mode == MODE_MOOD)
     {
         g_led_fade = true;
@@ -113,19 +113,14 @@ void myISR_fade()
             gDelta *= -1;
         if (bIntensity >= 255 || bIntensity <= 0)
             bDelta *= -1;
-        
-        
+
         servo_angle = servo_angle + sDelta;
-        if (servo_angle >= SERVO_POS_MAX || servo_angle <= SERVO_POS_MIN){
+        if (servo_angle >= SERVO_POS_MAX || servo_angle <= SERVO_POS_MIN)
             sDelta *= -1;
-            servo_angle = servo_angle + sDelta;
-      }
-        
     }
     else
         g_led_fade = false;
 }
-
 
 void myISR_setMode()
 {
@@ -185,23 +180,21 @@ void gpioRGBColor(int rIntensity, int gIntensity, int bIntensity)
     gpioAnalogWrite(PIN_LEDB, bIntensity);
 }
 
-int main()
-{
+int main() {
     unsigned long t_start_ms, t_elapsed_ms;
-    /* [P4] Write your variables FROM here*/
     int angle;
     int n = 0;
     int led_state = 0;
-    /* [P4] Write your variables UP TO here*/
 
     srand((unsigned int)time(NULL));
 
-    // GPIO settings
-    if(gpioInitialise()<0) {
+    // Initialize GPIO
+    if (gpioInitialise() < 0) {
         printf("Cannot initialize GPIOs\r\n");
         return 1;
     }
 
+    // Set GPIO modes
     gpioSetMode(PIN_LEDR, PI_OUTPUT);
     gpioSetMode(PIN_LEDG, PI_OUTPUT);
     gpioSetMode(PIN_LEDB, PI_OUTPUT);
@@ -213,45 +206,33 @@ int main()
     gpioWrite(PIN_LEDG, PI_LOW);
     gpioWrite(PIN_LEDB, PI_LOW);
 
-    // Interrupt settings
-    /* [P4] Write your code FROM here */
+    // Setup interrupts
     gpioSetISRFunc(PIN_BTN, EITHER_EDGE, 0, myISR_setMode);
-    // Set the period properly
     gpioSetTimerFunc(0, 800, myISR_servo);
     gpioSetTimerFunc(1, 500, myISR_color);
-    //gpioSetTimerFunc(2, 600, myISR_color);
-    /* [P4] Write your code UP TO here */
+    // gpioSetTimerFunc(2, 600, myISR_color); // Comment out if not used
 
-    // Infinite loop
-    while(1) {
+    // Main loop
+    while (1) {
         t_start_ms = millis();
-        
-        /* [P4] Write your code FROM here */
+
         if (g_led_color) {
-            g_led_on = false;
             if (g_led_color) {
                 g_led_color = false;
-                led_state = led_state % 7 + 1;
+                led_state = (led_state + 1) % 7 + 1;  // Cycle through LED states
             }
             switch_led_color(led_state);
-            gpioServo(PIN_SERVO, angle);
-        }
-        else if (g_servo) {
+        } else if (g_servo) {
             g_servo = false;
-            switch_led_color(0);
+            switch_led_color(0);  // Turn all LEDs off
             angle = change_servo_angle(n++);
             gpioServo(PIN_SERVO, angle);
-            n %= 5;
+            n %= 5;  // Wrap around the servo position index
+        } else if (g_led_fade) {
+            gpioRGBColor(rIntensity, gIntensity, bIntensity);  // Apply color changes
+            gpioServo(PIN_SERVO, servo_angle);  // Apply servo movement
+            g_led_fade = false;  // Reset the flag after updates
         }
-        else if (g_led_fade) {
-            g_led_fade = false;
-            gpioRGBColor(rIntensity++, gIntensity++, bIntensity++);
-            gpioServo(PIN_SERVO, angle++);
-     
-        
-        }
-        
-        /* [P4] Write your code UP TO here */
 
         t_elapsed_ms = millis() - t_start_ms;
         sleep_ms(LOOP_PERIOD_MS - t_elapsed_ms);

@@ -63,7 +63,7 @@ int main()
 {
     unsigned long t_start_ms, t_elapsed_ms;
     /* [P3] Write your variables FROM here*/
-    int led_color = 0;
+    int led_state = 0;
     int angle;
     int n = 1;
     /* [P3] Write your variables UP TO here*/

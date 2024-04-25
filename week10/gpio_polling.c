@@ -9,75 +9,99 @@
 #define PIN_LEDB 21
 #define PIN_SERVO 12
 
+// NEVER change SERVO_POS_MIN and SERVO_POS_MAX.
+// Changing the two values may break your servo motor.
 #define SERVO_POS_MIN 500
 #define SERVO_POS_MAX 2500
 
 #define LOOP_PERIOD_MS 1000
 
-int led_state = 1; // Global variable to cycle through LED states
-
 /* [P1] Write your function FROM here, if needed */
-void switch_led_color(int led_state) {
-    switch(led_state) {
-        case 1:
-            gpioWrite(PIN_LEDR, PI_HIGH);
-            gpioWrite(PIN_LEDG, PI_LOW);
-            gpioWrite(PIN_LEDB, PI_LOW);
-            break; 
-        case 2:
-            gpioWrite(PIN_LEDR, PI_LOW);
-            gpioWrite(PIN_LEDG, PI_HIGH);
-            gpioWrite(PIN_LEDB, PI_LOW);
-            break;   
-        case 3:
-            gpioWrite(PIN_LEDR, PI_HIGH);
-            gpioWrite(PIN_LEDG, PI_HIGH);
-            gpioWrite(PIN_LEDB, PI_LOW);
-            break;
-        case 4:
-            gpioWrite(PIN_LEDR, PI_LOW);
-            gpioWrite(PIN_LEDG, PI_LOW);
-            gpioWrite(PIN_LEDB, PI_HIGH);
-            break;
-        case 5:
-            gpioWrite(PIN_LEDR, PI_HIGH);
-            gpioWrite(PIN_LEDG, PI_LOW);
-            gpioWrite(PIN_LEDB, PI_HIGH);
-            break;
-        case 6:
-            gpioWrite(PIN_LEDR, PI_LOW);
-            gpioWrite(PIN_LEDG, PI_HIGH);
-            gpioWrite(PIN_LEDB, PI_HIGH);
-            break;
-        case 7:
-            gpioWrite(PIN_LEDR, PI_HIGH);
-            gpioWrite(PIN_LEDG, PI_HIGH);
-            gpioWrite(PIN_LEDB, PI_HIGH);
-            break;
-        default:
-            gpioWrite(PIN_LEDR, PI_LOW);
-            gpioWrite(PIN_LEDG, PI_LOW);
-            gpioWrite(PIN_LEDB, PI_LOW);
-            break;
+void switch_led_color(int led_state)
+{
+    switch (led_state) {
+    case 1:
+        gpioWrite(PIN_LEDR, PI_HIGH);
+        gpioWrite(PIN_LEDG, PI_LOW);
+        gpioWrite(PIN_LEDB, PI_LOW);
+        break;
+    case 2:
+        gpioWrite(PIN_LEDR, PI_LOW);
+        gpioWrite(PIN_LEDG, PI_HIGH);
+        gpioWrite(PIN_LEDB, PI_LOW);
+        break;
+    case 3:
+        gpioWrite(PIN_LEDR, PI_HIGH);
+        gpioWrite(PIN_LEDG, PI_HIGH);
+        gpioWrite(PIN_LEDB, PI_LOW);
+        break;
+    case 4:
+        gpioWrite(PIN_LEDR, PI_LOW);
+        gpioWrite(PIN_LEDG, PI_LOW);
+        gpioWrite(PIN_LEDB, PI_HIGH);
+        break;
+    case 5:
+        gpioWrite(PIN_LEDR, PI_HIGH);
+        gpioWrite(PIN_LEDG, PI_LOW);
+        gpioWrite(PIN_LEDB, PI_HIGH);
+        break;
+    case 6:
+        gpioWrite(PIN_LEDR, PI_LOW);
+        gpioWrite(PIN_LEDG, PI_HIGH);
+        gpioWrite(PIN_LEDB, PI_HIGH);
+        break;
+    case 7:
+        gpioWrite(PIN_LEDR, PI_HIGH);
+        gpioWrite(PIN_LEDG, PI_HIGH);
+        gpioWrite(PIN_LEDB, PI_HIGH);
+        break;
+    case 0:
+        gpioWrite(PIN_LEDR, PI_LOW);
+        gpioWrite(PIN_LEDG, PI_LOW);
+        gpioWrite(PIN_LEDB, PI_LOW);
+        break;
     }
 }
+
 /* [P1] Write your function UP TO here, if needed */
 
+
 int change_servo_angle(int servo_state){
-    // Calculate new servo angle based on current state
-    int servo_angle = SERVO_POS_MIN + servo_state * 180; // Each state changes the angle by 45 degrees
-    if (servo_angle > SERVO_POS_MAX) servo_angle = SERVO_POS_MIN; // Reset to minimum if it exceeds max
+    int servo_angle;
+   /* [P1] Write your function for servo*/
+    /*
+    if (servo_state == 5) {
+        servo_state = 1;
+    }
+    else {
+        servo_state++;
+    }
+    servo_angle = 500 * servo_state;
+    */
+    servo_angle = SERVO_POS_MIN + servo_state * 180; // Each state changes the angle by 45 degrees
+    if (servo_angle > SERVO_POS_MAX){
+        servo_angle = SERVO_POS_MIN; 
+    } // Reset to minimum if it exceeds max
+
+   /* [P1] Write your function FROM here*/
     return servo_angle;
 }
 
-int main() {
+int main()
+{
     unsigned long t_start_ms, t_elapsed_ms;
-    int servo_state = 0;  // To cycle servo from 0-180 degrees in steps
+
+    /* [P1] Write your variables FROM here */
+    int angle;
+    int n = 0;
     int btn_state;
+    int led_state = 0;
+    /* [P1] Write your variables UP TO here */
 
     srand((unsigned int)time(NULL));
 
-    if(gpioInitialise() < 0) {
+    // GPIO settings
+    if(gpioInitialise()<0) {
         printf("Cannot initialize GPIOs\r\n");
         return 1;
     }
@@ -92,20 +116,28 @@ int main() {
     gpioWrite(PIN_LEDG, PI_LOW);
     gpioWrite(PIN_LEDB, PI_LOW);
 
+    // Infinite loop
     while(1) {
         t_start_ms = millis();
 
         /* [P1] Write your codes FROM here */
-        // Change servo angle based on state
-        int servo_angle = change_servo_angle(servo_state++);
-        gpioServo(PIN_SERVO, servo_angle);
-        servo_state %= 5; // There are 5 states (0-4) corresponding to 0-180 degrees
+        // Set the servo angle to 0->45->90->145->180...
+        angle = change_servo_angle(n++);
+        gpioServo(PIN_SERVO, angle);
+        n %= 5;
+        sleep_ms(LOOP_PERIOD_MS);
 
-        // Check button state and change LED color if pressed
+        // Read the button pin state
         btn_state = gpioRead(PIN_BTN);
-        if(btn_state == PI_LOW) { // Assuming low means pressed
-            led_state = (led_state % 7) + 1; // Cycle through 7 color states
+
+        // If the button is pushed, change the color of the LED. Be
+        // sure the LED color switches between five or more colors.
+        if (btn_state == PI_LOW) {
+            led_state = (led_state + 1) % 7 + 1;
             switch_led_color(led_state);
+        }
+        else {
+            switch_led_color(0);
         }
         /* [P1] Write your codes UP TO here */
 

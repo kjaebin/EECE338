@@ -219,7 +219,9 @@ int main()
     // Set the period properly
     gpioSetTimerFunc(0, 800, myISR_servo);
     gpioSetTimerFunc(1, 500, myISR_color);    
-    gpioSetTimerFunc(1, 10, myISR_fade);
+    gpioSetTimerFunc(1, 10, myISR_fade);    
+    gpioSetTimerFunc(1, 500, myISR_led);
+
 
     //gpioSetTimerFunc(2, 600, myISR_color);
     /* [P4] Write your code UP TO here */

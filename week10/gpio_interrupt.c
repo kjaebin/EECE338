@@ -16,7 +16,7 @@
 
 /* [P2] Write your global variables FROM here*/
 volatile int btn_state;
-volatile int led_state;
+volatile bool g_led_color = false;
 /* [P2] Write your global variables UP TO here*/
 
 
@@ -60,7 +60,7 @@ void switch_led_color(int led_state)
         gpioWrite(PIN_LEDG, PI_HIGH);
         gpioWrite(PIN_LEDB, PI_HIGH);
         break;
-    case 0:
+    default:
         gpioWrite(PIN_LEDR, PI_LOW);
         gpioWrite(PIN_LEDG, PI_LOW);
         gpioWrite(PIN_LEDB, PI_LOW);
@@ -88,13 +88,8 @@ void myISR()
     /*** [P2] Write your code FROM here ***/
     // If the button is pushed, change the color of the LED. Be
     // sure the LED color switches between five or more colors.
-    if (btn_state == PI_LOW) {
-        led_state = (led_state + 1) % 7 + 1;
-        switch_led_color(led_state);
-    }
-    else {
-        switch_led_color(0);
-    }
+     g_led_color = true;
+  
     /*** [P2] Write your code UP TO here ***/
 }
 
@@ -105,6 +100,7 @@ int main()
     /* [P2] Write your variables FROM here, if needed */
     int angle;
     int n = 0;
+    int led_state = 0;
     /* [P2] Write your variables UP TO here, if needed */
 
     // GPIO settings
@@ -135,6 +131,11 @@ int main()
         gpioServo(PIN_SERVO, angle);
         n %= 5;
         sleep_ms(LOOP_PERIOD_MS);
+        if (g_led_color) {
+            g_led_color = false;
+            led_state = led_state % 7 + 1;
+            switch_led_color(led_state);
+        }
         /*** [P2] Write your code UP TO here ***/
 
         t_elapsed_ms = millis() - t_start_ms;

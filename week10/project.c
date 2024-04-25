@@ -32,7 +32,11 @@ volatile int8_t sDelta = 10;
 volatile int mode = MODE_MOOD;
 volatile int btn_state;
 volatile bool g_led_fade = false;
+
+
 /* [P4] Write your global variables FROM here */
+
+#define SERVO_ANGLE_STEP 225  // Assuming 5 positions from 500 to 2500 inclusive
 
 /* [P4] Write your global variables UP TO here */
 
@@ -80,20 +84,34 @@ void myISR_setMode()
 
     /*** [P4] Write your code FROM here ***/
 
+    mode = (mode + 1) % 3; // Cycle through the modes
+
     /*** [P4] Write your code UP TO here ***/
 }
 
 void myISR_servo()
 {
-    /* [P4] Write your code FROM here */
+    /*** [P4] Write your code FROM here ***/
 
-    /* [P4] Write your code UP TO here */
+    if (mode == MODE_MOTOR) {
+        servo_angle += SERVO_ANGLE_STEP;
+        if (servo_angle > SERVO_POS_MAX || servo_angle < SERVO_POS_MIN) {
+            sDelta = -sDelta; // Reverse direction at bounds
+            servo_angle += sDelta;
+        }
+    }
+
+    /*** [P4] Write your code UP TO here ***/
 }
 
 
 void myISR_led()
 {
     /*** [P4] Write your code FROM here ***/
+
+    if (mode == MODE_LED) {
+        g_led_fade = !g_led_fade; // Toggle LED fade state
+    }
 
     /*** [P4] Write your code UP TO here ***/
 }
@@ -102,9 +120,12 @@ void myISR_color()
 {
     /*** [P4] Write your code FROM here ***/
 
+    if (mode == MODE_MOOD && g_led_fade) {
+        gpioRGBColor(rIntensity, gIntensity, bIntensity);
+    }
+
     /*** [P4] Write your code UP TO here ***/
 }
-
 
 
 void gpioRGBColor(int rIntensity, int gIntensity, int bIntensity)
@@ -142,6 +163,7 @@ int main()
 
     // Interrupt settings
     /* [P4] Write your code FROM here */
+
     gpioSetISRFunc(PIN_BTN, EITHER_EDGE, 0, myISR_setMode);
     // Set the period properly
 
@@ -153,6 +175,22 @@ int main()
         
         /* [P4] Write your code FROM here */
         
+        switch (mode) {
+        case MODE_LED:
+            // LED mode logic
+            if (g_led_fade) {
+                gpioRGBColor(rIntensity, gIntensity, bIntensity);
+            }
+            break;
+        case MODE_MOTOR:
+            // Motor mode logic
+            gpioServo(PIN_SERVO, servo_angle);
+            break;
+        case MODE_MOOD:
+            // Mood mode logic
+            myISR_fade(); // Call fade function to adjust LED colors
+            break;
+        }
         
         /* [P4] Write your code UP TO here */
 
